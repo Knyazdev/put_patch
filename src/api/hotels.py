@@ -39,10 +39,11 @@ async def get_hotels(
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel['id'] != hotel_id]
-    return {'error': None, 'result': {}}
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelRepository(session).delete({'id': hotel_id})
+        await session.commit()
+    return {'status': 'OK'}
 
 
 @router.post("")
@@ -63,28 +64,18 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     }
 })):
     async with async_session_maker() as session:
-        query = await HotelRepository(session).add(**hotel_data.model_dump())
+        hotel = await HotelRepository(session).add(hotel_data)
         await session.commit()
-        id = await HotelRepository(session).get_insert_id(query)
-        item = await HotelRepository(session).get_one_or_none(id=id)
 
-    return {'status': 'OK', 'data': item}
+    return {'status': 'OK', 'data': hotel}
 
 
 @router.put("/{hotel_id}")
-def update_hotel(hotel_id: int, hotel_data: Hotel):
-    global hotels
-    result = None
-    for index, hotel in enumerate(hotels):
-        if hotel['id'] == hotel_id:
-            hotels[index]['title'] = hotel_data.title
-            hotels[index]['name'] = hotel_data.name
-            result = hotels[index]
-            break
-
-    if not result:
-        return {'error': {'code': 404, 'message': 'Object not found'}, 'result': None}
-    return {'error': None, 'result': result}
+async def update_hotel(hotel_id: int, hotel_data: Hotel):
+    async with async_session_maker() as session:
+        await HotelRepository(session).edit(hotel_data, {'id': hotel_id})
+        await session.commit()
+    return {'status': 'OK'}
 
 
 @router.patch('/{hotel_id}',
