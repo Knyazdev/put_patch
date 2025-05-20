@@ -2,21 +2,10 @@ from fastapi import Query, APIRouter, Body, Depends
 from schemas.hotels import Hotel, HotelPatch
 from .dependencies import PaginationParams
 from typing import Annotated
-from sqlalchemy import insert, select, func
 from database import async_session_maker
 from repositories.hotels import HotelRepository
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
-
-hotels = [
-    {'id': 1, 'title': 'Tashkent', 'name': 'uzbekistan'},
-    {'id': 2, 'title': 'Nukus', 'name': 'uzbekistan'},
-    {'id': 3, 'title': 'Dushanbe', 'name': 'tadjikistan'},
-    {'id': 4, 'title': 'Ashqabat', 'name': 'turkmenistan'},
-    {'id': 5, 'title': 'Bishkek', 'name': 'kirgiziya'},
-    {'id': 6, 'title': 'Astana', 'name': 'kazakhstan'},
-    {'id': 7, 'title': 'Moscow', 'name': 'russia'}
-]
 
 
 @router.get("")
@@ -41,7 +30,7 @@ async def get_hotels(
 @router.delete("/{hotel_id}")
 async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
-        await HotelRepository(session).delete({'id': hotel_id})
+        await HotelRepository(session).delete(id=hotel_id)
         await session.commit()
     return {'status': 'OK'}
 
@@ -73,7 +62,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 @router.put("/{hotel_id}")
 async def update_hotel(hotel_id: int, hotel_data: Hotel):
     async with async_session_maker() as session:
-        await HotelRepository(session).edit(hotel_data, {'id': hotel_id})
+        await HotelRepository(session).edit(hotel_data, id=hotel_id)
         await session.commit()
     return {'status': 'OK'}
 
@@ -82,18 +71,15 @@ async def update_hotel(hotel_id: int, hotel_data: Hotel):
               summary="Partially update of hotels",
               description="About this patch"
               )
-def part_update_hotel(hotel_id: int, hotel_data: HotelPatch):
-    global hotels
-    result = None
-    for index, hotel in enumerate(hotels):
-        if hotel['id'] == hotel_id:
-            if hotel_data.title:
-                hotels[index]['title'] = hotel_data.title
-            if hotel_data.name:
-                hotels[index]['name'] = hotel_data.name
+async def part_update_hotel(hotel_id: int, hotel_data: HotelPatch):
+    async with async_session_maker() as session:
+        await HotelRepository(session).edit(hotel_data, id=hotel_id, exclude_unset=True)
+        await session.commit()
+    return {'status': 'OK'}
 
-            result = hotels[index]
-            break
-    if not result:
-        return {'error': {'code': 404, 'message': 'Object not found'}, 'result': None}
-    return {'error': None, 'result': result}
+
+@router.get('/{hotel_id}')
+async def get_one_item(hotel_id: int):
+    async with async_session_maker() as session:
+        result = await HotelRepository(session).get_one_or_none(id=hotel_id)
+        return {'status': 'OK', 'hotel': result}
