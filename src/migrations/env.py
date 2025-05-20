@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from src.config import settings
 
-from src.database import Base
+from database import Base
 from src.models.hotels import HotelOrm
 from src.models.rooms import RoomsOrm
 

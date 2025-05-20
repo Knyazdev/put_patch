@@ -2,6 +2,9 @@ from fastapi import Query, APIRouter, Body, Depends
 from schemas.hotels import Hotel, HotelPatch
 from .dependencies import PaginationParams
 from typing import Annotated
+from sqlalchemy import insert, select
+from database import async_session_maker
+from models.hotels import HotelOrm
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
@@ -17,22 +20,27 @@ hotels = [
 
 
 @router.get("")
-def get_hotels(
+async def get_hotels(
     pagination: Annotated[PaginationParams, Depends()],
-    id: int | None = Query(None, description="Айдишник"),
-    title: str | None = Query(None, description="Названия")
+    title: str | None = Query(None, description="Названия"),
+    location: str | None = Query(None, description="Location")
 ):
-    hotels_result = []
-    for hotel in hotels:
-        if id and hotel['id'] != id:
-            continue
-        if title and hotel['title'] != title:
-            continue
-        hotels_result.append(hotel)
-    start = pagination.per_page * (pagination.page - 1)
+    per_page = pagination.per_page or 5
+    async with async_session_maker() as session:
+        query = select(HotelOrm)
+        if location:
+            query = query.filter(HotelOrm.location.like(f"%{location}%"))
+        if title:
+            query = query.filter(HotelOrm.title.like(f"%{title}%"))
+        query = (
+            query
+            .limit(per_page)
+            .offset(per_page*(pagination.page - 1))
+        )
+        result = await session.execute(query)
     return {
         'error': None,
-        'result': hotels_result[start:][:pagination.per_page]
+        'result': result.scalars().all()
     }
 
 
@@ -44,26 +52,29 @@ def delete_hotel(hotel_id: int):
 
 
 @router.post("")
-def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     "1": {
         "summary": "Sochi",
         'value': {
             'title': "Sochi 5 star hotel",
-            'name': 'sochi_u_berega'
+            'location': 'sochi_u_berega'
         }
     },
     "2": {
         "summary": "Moscow",
         'value': {
             'title': "Moscow 5 star hotel",
-            'name': 'moscow_hotel'
+            'location': 'moscow_hotel'
         }
     }
 })):
-    global hotels
-    id = hotels[-1]['id'] + 1
-    hotels.append({'id': id, 'title': hotel_data.title,
-                  'name': hotel_data.name})
+    async with async_session_maker() as session:
+        stmt = insert(HotelOrm).values(**hotel_data.model_dump())
+        print(stmt.compile(compile_kwargs={"literal_binds": True}))
+        r = await session.execute(stmt)
+        await session.commit()
+        id = r.inserted_primary_key[0]
+
     return {'error': None, 'result': {'id': id}}
 
 
