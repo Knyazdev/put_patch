@@ -18,3 +18,13 @@ async def create_booking(
     await db.commit()
 
     return {'status': 'OK', 'data': booking}
+
+
+@router.get("/")
+async def get_all(db: DBDep):
+    return {'error': None, 'result': await db.booking.get_all()}
+
+
+@router.get("/me")
+async def get_authorithed_items(db: DBDep, user_id: userIdDep):
+    return {'error': None, 'result': await db.booking.get_mine(user_id)}
