@@ -1,17 +1,21 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class RoomAdd(BaseModel):
-    hotel_id: Optional[int] = 0
+class RoomRequest(BaseModel):
     title: str
     description: str
     price: int
     quantity: int = 0
 
 
+class RoomAdd(RoomRequest):
+    hotel_id: int
+
+
 class Room(RoomAdd):
     id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RoomPatch(BaseModel):
