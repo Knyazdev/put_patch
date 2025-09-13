@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body
-from schemas.booking import BookingRequest, BookingAdd
+from src.schemas.booking import BookingRequest, BookingAdd
 from .dependencies import DBDep, userIdDep
 
 

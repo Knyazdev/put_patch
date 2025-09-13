@@ -1,6 +1,6 @@
-from repositories.base import BaseRepository
-from models.users import UsersOrm
-from schemas.users import User, UserWithHashedPassword
+from src.repositories.base import BaseRepository
+from src.models.users import UsersOrm
+from src.schemas.users import User, UserWithHashedPassword
 from sqlalchemy import select
 from pydantic import EmailStr
 

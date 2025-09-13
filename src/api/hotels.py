@@ -1,7 +1,8 @@
 from fastapi import Query, APIRouter, Body, Depends
-from schemas.hotels import HotelAdd, HotelPatch
+from src.schemas.hotels import HotelAdd, HotelPatch
 from .dependencies import PaginationParams, DBDep
 from typing import Annotated
+from datetime import date
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
@@ -11,16 +12,20 @@ async def get_hotels(
     pagination: Annotated[PaginationParams, Depends()],
     db: DBDep,
     title: str | None = Query(None, description="Названия"),
-    location: str | None = Query(None, description="Location")
+    location: str | None = Query(None, description="Location"),
+    date_from: date = Query(example="2025-12-01"),
+    date_to: date = Query(example="2025-07-01")
 ):
     per_page = pagination.per_page or 5
     return {
         'error': None,
-        'result': await db.hotels.get_all(
-            location=location,
-            title=title,
+        'result': await db.hotels.get_filtered_by_time(
+            date_from=date_from,
+            date_to=date_to,
+            offset=per_page,
             page=pagination.page,
-            offset=per_page
+            title=title,
+            location=location
         )
     }
 

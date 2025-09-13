@@ -1,4 +1,4 @@
-from database import Base
+from src.database import Base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, Date

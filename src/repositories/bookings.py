@@ -1,6 +1,6 @@
-from repositories.base import BaseRepository
-from models.bookings import BookingOrm
-from schemas.booking import Booking
+from src.repositories.base import BaseRepository
+from src.models.bookings import BookingOrm
+from src.schemas.booking import Booking
 from sqlalchemy import select
 
 

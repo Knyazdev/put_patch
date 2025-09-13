@@ -1,7 +1,7 @@
-from repositories.hotels import HotelRepository
-from repositories.rooms import RoomRepository
-from repositories.users import UserRepository
-from repositories.bookings import BookingRepository
+from src.repositories.hotels import HotelRepository
+from src.repositories.rooms import RoomRepository
+from src.repositories.users import UserRepository
+from src.repositories.bookings import BookingRepository
 
 
 class DBManager:

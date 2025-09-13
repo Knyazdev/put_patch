@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from models.bookings import BookingOrm
+from src.models.bookings import BookingOrm
 
 
 class BookingRequest(BaseModel):

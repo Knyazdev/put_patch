@@ -1,5 +1,6 @@
 from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
+from typing import Any
 
 
 class BaseRepository:
@@ -39,3 +40,8 @@ class BaseRepository:
     async def delete(self, **filter_by) -> None:
         stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(stmt)
+
+    async def get_filtered(self, *filter, **filter_by) -> list[BaseModel | Any]:
+        query = select(self.model).filter(*filter).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        return [self.scheme.model_validate(model, from_attributes=True) for model in result.scalars().all()]
