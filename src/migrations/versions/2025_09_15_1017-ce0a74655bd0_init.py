@@ -1,8 +1,8 @@
-"""add booking model hybrid
+"""init
 
-Revision ID: 73c1ee4ca350
-Revises: 38d9babb8d80
-Create Date: 2025-06-18 18:15:19.779035
+Revision ID: ce0a74655bd0
+Revises: 8e21199856b3
+Create Date: 2025-09-15 10:17:48.704652
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "73c1ee4ca350"
-down_revision: Union[str, None] = "38d9babb8d80"
+revision: str = "ce0a74655bd0"
+down_revision: Union[str, None] = "8e21199856b3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Body, Query
 from src.schemas.rooms import RoomAdd, RoomPatch, RoomRequest
+from src.schemas.facilities import RoomFacilityRequest
 from .dependencies import DBDep
 from datetime import date
 
@@ -24,7 +25,10 @@ async def create_hotels_room(
     hotel_id: int,
     data: RoomRequest = Body()
 ):
-    room = await db.rooms.add(RoomAdd(hotel_id=hotel_id, **data.model_dump()))
+    room = await db.rooms.add(RoomAdd(hotel_id=hotel_id, **data.model_dump(exclude={'facility_ids'})))
+    li = [RoomFacilityRequest(room_id=room.id, facility_id=fid)
+          for fid in data.facility_ids]
+    await db.rooms_facilities.add_bulk(li)
     await db.commit()
     return {'error': None, 'result': room}
 
@@ -37,6 +41,7 @@ async def update_by_id(
     data: RoomRequest = Body()
 ):
     await db.rooms.edit(RoomAdd(hotel_id=hotel_id, **data.model_dump()), id=room_id)
+    await db.rooms_facilities.update(room_id=room_id, data=data.facility_ids)
     await db.commit()
     return {'status': 'OK'}
 
@@ -48,6 +53,7 @@ async def delete_by_id(
     room_id: int
 ):
     await db.rooms.delete(id=room_id, hotel_id=hotel_id)
+    await db.rooms_facilities.delete(room_id=room_id)
     await db.commit()
     return {'status': 'OK'}
 
@@ -60,6 +66,7 @@ async def update_partial(
     data: RoomPatch = Body()
 ):
     await db.rooms.edit(data, hotel_id=hotel_id, id=room_id, exclude_unset=True)
+    await db.rooms_facilities.update(room_id=room_id, data=data.facility_ids)
     await db.commit()
     return {'status': 'OK'}
 
