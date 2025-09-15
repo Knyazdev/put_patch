@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body, Query
-from src.schemas.rooms import RoomAdd, RoomPatch, RoomRequest
+from src.schemas.rooms import RoomAdd, RoomPatch, RoomRequest, RoomPatchRequest
 from src.schemas.facilities import RoomFacilityRequest
 from .dependencies import DBDep
 from datetime import date
@@ -63,10 +63,13 @@ async def update_partial(
     db: DBDep,
     hotel_id: int,
     room_id: int,
-    data: RoomPatch = Body()
+    data: RoomPatchRequest = Body()
 ):
-    await db.rooms.edit(data, hotel_id=hotel_id, id=room_id, exclude_unset=True)
-    await db.rooms_facilities.update(room_id=room_id, data=data.facility_ids)
+    room_data_dict = data.model_dump(exclude_unset=True)
+    dat = RoomPatch(hotel_id=hotel_id, id=room_id, **room_data_dict)
+    await db.rooms.edit(dat, hotel_id=hotel_id, id=room_id, exclude_unset=True)
+    if 'facility_ids' in room_data_dict:
+        await db.rooms_facilities.update(room_id=room_id, data=data.facility_ids)
     await db.commit()
     return {'status': 'OK'}
 
