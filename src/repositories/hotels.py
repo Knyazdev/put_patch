@@ -5,11 +5,12 @@ from sqlalchemy import select, func
 from src.schemas.hotels import Hotel
 from datetime import date
 from .utils import rooms_ids_for_booking
+from src.repositories.mappers.mappers import HotelDataMapper
 
 
 class HotelRepository(BaseRepository):
     model = HotelOrm
-    scheme = Hotel
+    mapper = HotelDataMapper
 
     async def get_all(self, location, title, page, offset) -> list[Hotel]:
         query = select(self.model)
@@ -25,7 +26,7 @@ class HotelRepository(BaseRepository):
             .offset(offset*(page - 1))
         )
         result = await self.session.execute(query)
-        return [self.scheme.model_validate(item, from_attributes=True) for item in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(item) for item in result.scalars().all()]
 
     async def get_filtered_by_time(
             self,
@@ -58,4 +59,4 @@ class HotelRepository(BaseRepository):
         )
 
         result = await self.session.execute(query)
-        return [self.scheme.model_validate(item, from_attributes=True) for item in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(item) for item in result.scalars().all()]

@@ -7,18 +7,18 @@ from src.repositories.bookings import BookingOrm
 from src.repositories.utils import rooms_ids_for_booking
 from pydantic import BaseModel
 from sqlalchemy.orm import selectinload, joinedload
-from typing import Any
+from src.repositories.mappers.mappers import RoomDataMapper, RoomRelDataMapper
 
 
 class RoomRepository(BaseRepository):
     model = RoomsOrm
-    scheme = Room
+    mapper = RoomDataMapper
 
     async def get_all(self, hotel_id) -> list[Room]:
         query = select(self.model)
         query = query.filter_by(hotel_id=hotel_id)
         result = await self.session.execute(query)
-        return [self.scheme.model_validate(item, from_attributes=True) for item in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(item) for item in result.scalars().all()]
 
     async def get_filtered_by_time(
             self,
@@ -37,12 +37,12 @@ class RoomRepository(BaseRepository):
             .filter_by(**filter_by)
         )
         result = await self.session.execute(query)
-        return [RoomWithRels.model_validate(model, from_attributes=True) for model in result.scalars().all()]
+        return [RoomRelDataMapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).options(selectinload(
             self.model.facilities)).filter_by(**filter_by)
         result = await self.session.execute(query)
         if result:
-            return RoomWithRels.model_validate(result.scalar_one_or_none(), from_attributes=True)
+            return RoomRelDataMapper.map_to_domain_entity(result.scalar_one_or_none())
         return None
