@@ -1,3 +1,8 @@
+
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache",
+           lambda *a, **kw: (lambda f: f)).start()
 import pytest
 from src.database import Base, engine_null_pull, async_session_maker_null_pull
 from src.models import *
@@ -9,6 +14,7 @@ from src.utils.db_manager import DBManager
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.api.dependencies import get_db
+
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -60,3 +66,13 @@ async def test_register_user(setup_database, ac):
         'email': 'knyaz.dev@gmail.com',
         'password': '123456'
     })
+
+@pytest.fixture(autouse=True, scope='session')
+async def authenticated_ac(test_register_user, ac):
+    response = await ac.post("/auth/login", json={
+        'email':'knyaz.dev@gmail.com',
+        'password':'123456'
+    })
+    assert response
+    assert response.status_code == 200
+    print(f"{response.cookies}")

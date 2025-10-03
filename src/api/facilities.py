@@ -9,9 +9,8 @@ router = APIRouter(prefix='/facility', tags=['Facilities'])
 
 
 @router.get('')
-# @cache(expire=10)
+@cache(expire=10)
 async def items(db: DBDep):
-    print("Go to DB")
     return {
         'error': None,
         'result': await db.facilities.get_all()

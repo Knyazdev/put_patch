@@ -7,6 +7,7 @@ from src.init import redis_manager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
+
 import sys
 from pathlib import Path
 # isort: off
