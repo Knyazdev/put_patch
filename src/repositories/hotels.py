@@ -4,7 +4,7 @@ from src.models.rooms import RoomsOrm
 from sqlalchemy import select, func
 from src.schemas.hotels import Hotel
 from datetime import date
-from .utils import rooms_ids_for_booking
+from src.repositories.utils import rooms_ids_for_booking
 from src.repositories.mappers.mappers import HotelDataMapper
 
 

@@ -1,6 +1,6 @@
 from fastapi import Query, APIRouter, Body, Depends
 from src.schemas.hotels import HotelAdd, HotelPatch
-from .dependencies import PaginationParams, DBDep
+from src.api.dependencies import PaginationParams, DBDep
 from typing import Annotated
 from datetime import date
 
