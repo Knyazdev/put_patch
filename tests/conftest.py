@@ -14,6 +14,7 @@ from src.utils.db_manager import DBManager
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.api.dependencies import get_db
+from sqlalchemy import delete
 
 
 
@@ -78,3 +79,11 @@ async def authenticated_ac(test_register_user, ac):
     # print(f"{response.cookies}")
     assert response.cookies['access_token']
     yield ac
+
+@pytest.fixture(scope='session')
+async def clear_books():
+    async with DBManager(session_factory=async_session_maker_null_pull) as _db:
+        await _db.session.execute(
+            delete(_db.booking.model).where(_db.booking.model.id > 0)
+        )
+        await _db.commit()

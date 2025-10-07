@@ -13,11 +13,12 @@ async def create_booking(
     req: BookingRequest = Body()
 ):
     room = await db.rooms.get_one_or_none(id=req.room_id)
+    hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
     if not room:
         raise HTTPException(404, detail="There are no places")
     data = BookingAdd(user_id=user_id, price=room.price, **req.model_dump())
     # booking = await db.booking.add(data)
-    booking = await db.booking.add_booking(data)
+    booking = await db.booking.add_booking(data, hotel_id=hotel.id)
     await db.commit()
 
     return {'status': 'OK', 'data': booking}
