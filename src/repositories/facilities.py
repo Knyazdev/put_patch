@@ -1,6 +1,5 @@
 from src.repositories.base import BaseRepository
 from src.models.facilites import FacilityOrm, RoomFacilitiesOrm
-from src.schemas.facilities import Facility, RoomFacility
 from sqlalchemy import select
 from src.schemas.facilities import RoomFacilityRequest
 from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper

@@ -2,8 +2,8 @@ from typing import TypeVar
 from pydantic import BaseModel
 from src.database import Base
 
-SchemeType = TypeVar('SchemeType', bound=BaseModel)
-DBModelType = TypeVar('DBModelType', bound=Base)
+SchemeType = TypeVar("SchemeType", bound=BaseModel)
+DBModelType = TypeVar("DBModelType", bound=Base)
 
 
 class DataMapper:

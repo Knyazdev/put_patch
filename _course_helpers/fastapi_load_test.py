@@ -23,5 +23,5 @@ async def async_func(id: int):
     print(f"async. Ended {id}: {time():.2f}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

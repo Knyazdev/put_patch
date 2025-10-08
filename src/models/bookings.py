@@ -5,10 +5,10 @@ from sqlalchemy import ForeignKey, Date
 
 
 class BookingOrm(Base):
-    __tablename__ = 'bookings'
+    __tablename__ = "bookings"
     id: Mapped[int] = mapped_column(primary_key=True)
-    room_id: Mapped[int] = mapped_column(ForeignKey('rooms.id'))
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     date_from: Mapped[Date] = mapped_column(Date)
     date_to: Mapped[Date] = mapped_column(Date)
     price: Mapped[int]

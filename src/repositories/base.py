@@ -14,7 +14,9 @@ class BaseRepository:
     async def get_all(self, *args, **kwargs):
         query = select(self.model)
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(item) for item in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(item) for item in result.scalars().all()
+        ]
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
@@ -24,8 +26,7 @@ class BaseRepository:
         return None
 
     async def add(self, data: BaseModel):
-        stmt = insert(self.model).values(
-            **data.model_dump()).returning(self.model)
+        stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result = await self.session.execute(stmt)
         return self.mapper.map_to_domain_entity(result.scalars().one())
 
@@ -33,11 +34,12 @@ class BaseRepository:
         stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(stmt)
 
-    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
+    async def edit(
+        self, data: BaseModel, exclude_unset: bool = False, **filter_by
+    ) -> None:
         stmt = (
             update(self.model)
-            .values(
-                **data.model_dump(exclude_unset=exclude_unset))
+            .values(**data.model_dump(exclude_unset=exclude_unset))
             .filter_by(**filter_by)
         )
         await self.session.execute(stmt)
@@ -49,4 +51,6 @@ class BaseRepository:
     async def get_filtered(self, *filter, **filter_by) -> list[BaseModel | Any]:
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
+        ]

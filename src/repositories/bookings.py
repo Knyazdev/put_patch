@@ -9,7 +9,6 @@ from src.repositories.utils import rooms_ids_for_booking
 from fastapi import HTTPException
 
 
-
 class BookingRepository(BaseRepository):
     model = BookingOrm
     mapper = BookingDataMapper
@@ -18,25 +17,24 @@ class BookingRepository(BaseRepository):
         query = select(self.model)
         query = query.filter_by(user_id=user_id)
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(item) for item in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(item) for item in result.scalars().all()
+        ]
 
     async def get_bookings_with_today_checkin(self):
-        query = (
-            select(self.model)
-            .filter(self.model.date_from == date.today())
-        )
+        query = select(self.model).filter(self.model.date_from == date.today())
         res = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(booking) for booking in res.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(booking) for booking in res.scalars().all()
+        ]
 
-    async def add_booking(self, data: HotelAdd, hotel_id:int):
+    async def add_booking(self, data: HotelAdd, hotel_id: int):
         room_ids = rooms_ids_for_booking(
-            date_from=data.date_from, 
-            date_to=data.date_to, 
-            hotel_id=hotel_id
+            date_from=data.date_from, date_to=data.date_to, hotel_id=hotel_id
         )
         query = await self.session.execute(room_ids)
         rooms: list[int] = query.scalars().all()
-        if not data.room_id in rooms:
+        if data.room_id not in rooms:
             raise HTTPException(500)
-            
+
         return await self.add(data)

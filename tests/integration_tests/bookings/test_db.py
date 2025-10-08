@@ -11,7 +11,7 @@ async def test_booking_crud(db):
         room_id=room_id,
         date_from=date(year=2025, month=10, day=2),
         date_to=date(year=2025, month=10, day=22),
-        price=2000
+        price=2000,
     )
     new_price = 3000
     booking = await db.booking.add(data)
@@ -22,7 +22,9 @@ async def test_booking_crud(db):
     item = await db.booking.get_one_or_none(id=id)
     assert item
     # (U)
-    await db.booking.edit(Booking(**item.model_dump(exclude={"price"}), price=new_price), id=id)
+    await db.booking.edit(
+        Booking(**item.model_dump(exclude={"price"}), price=new_price), id=id
+    )
     item = await db.booking.get_one_or_none(id=id)
     assert int(item.price) == new_price
     # (D)

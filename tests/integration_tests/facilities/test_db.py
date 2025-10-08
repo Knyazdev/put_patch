@@ -9,5 +9,5 @@ async def test_get_facilites(ac: AsyncClient):
 
 
 async def test_add_facility(db):
-    await db.facilities.add(FacilityRequest(title='Test Request'))
+    await db.facilities.add(FacilityRequest(title="Test Request"))
     await db.commit()

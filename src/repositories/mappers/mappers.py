@@ -1,4 +1,3 @@
-
 from src.repositories.mappers.base import DataMapper
 from src.models.hotels import HotelOrm
 from src.schemas.hotels import Hotel

@@ -3,15 +3,11 @@ from src.schemas.booking import BookingRequest, BookingAdd
 from .dependencies import DBDep, userIdDep
 
 
-router = APIRouter(prefix='/bookings', tags=['Booking'])
+router = APIRouter(prefix="/bookings", tags=["Booking"])
 
 
 @router.post("/")
-async def create_booking(
-    db: DBDep,
-    user_id: userIdDep,
-    req: BookingRequest = Body()
-):
+async def create_booking(db: DBDep, user_id: userIdDep, req: BookingRequest = Body()):
     room = await db.rooms.get_one_or_none(id=req.room_id)
     hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
     if not room:
@@ -21,14 +17,14 @@ async def create_booking(
     booking = await db.booking.add_booking(data, hotel_id=hotel.id)
     await db.commit()
 
-    return {'status': 'OK', 'data': booking}
+    return {"status": "OK", "data": booking}
 
 
 @router.get("/")
 async def get_all(db: DBDep):
-    return {'error': None, 'result': await db.booking.get_all()}
+    return {"error": None, "result": await db.booking.get_all()}
 
 
 @router.get("/me")
 async def get_authorithed_items(db: DBDep, user_id: userIdDep):
-    return {'error': None, 'result': await db.booking.get_mine(user_id)}
+    return {"error": None, "result": await db.booking.get_mine(user_id)}
