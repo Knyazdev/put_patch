@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Body, HTTPException
 from src.schemas.booking import BookingRequest, BookingAdd
 from .dependencies import DBDep, userIdDep
+from src.exceptions import RecordNotFoundException
 
 
 router = APIRouter(prefix="/bookings", tags=["Booking"])
 
 
-@router.post("/")
+@router.post("")
 async def create_booking(db: DBDep, user_id: userIdDep, req: BookingRequest = Body()):
-    room = await db.rooms.get_one_or_none(id=req.room_id)
+    try:
+        room = await db.rooms.get_one(id=req.room_id)
+    except RecordNotFoundException as ex:
+        raise HTTPException(404, detail=ex.detail)
     hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
-    if not room:
-        raise HTTPException(404, detail="There are no places")
     data = BookingAdd(user_id=user_id, price=room.price, **req.model_dump())
     # booking = await db.booking.add(data)
     booking = await db.booking.add_booking(data, hotel_id=hotel.id)

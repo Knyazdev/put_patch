@@ -3,6 +3,8 @@ from src.models.users import UsersOrm
 from sqlalchemy import select
 from pydantic import EmailStr
 from src.repositories.mappers.mappers import UserDataMapper, UserDataWithHashMapper
+from sqlalchemy.exc import IntegrityError
+from src.exceptions import UserAlreadyExistException
 
 
 class UserRepository(BaseRepository):
@@ -14,3 +16,9 @@ class UserRepository(BaseRepository):
         result = await self.session.execute(query)
         model = result.scalars().one()
         return UserDataWithHashMapper.map_to_domain_entity(model)
+    async def add(self, data):
+        try:
+            query = await super().add(data)
+        except IntegrityError:
+            raise UserAlreadyExistException
+        return query

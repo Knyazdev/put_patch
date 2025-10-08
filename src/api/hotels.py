@@ -1,8 +1,9 @@
-from fastapi import Query, APIRouter, Body, Depends
+from fastapi import Query, APIRouter, Body, Depends, HTTPException
 from src.schemas.hotels import HotelAdd, HotelPatch
 from src.api.dependencies import PaginationParams, DBDep
 from typing import Annotated
 from datetime import date
+from src.exceptions import DateFromMoreToException, RecordNotFoundException
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
@@ -17,16 +18,20 @@ async def get_hotels(
     date_to: date = Query(example="2025-07-01"),
 ):
     per_page = pagination.per_page or 5
+    try:
+        items = await db.hotels.get_filtered_by_time(
+                date_from=date_from,
+                date_to=date_to,
+                offset=per_page,
+                page=pagination.page,
+                title=title,
+                location=location,
+            )
+    except DateFromMoreToException as e:
+        raise HTTPException(status_code=400, detail=e.detail)
     return {
         "error": None,
-        "result": await db.hotels.get_filtered_by_time(
-            date_from=date_from,
-            date_to=date_to,
-            offset=per_page,
-            page=pagination.page,
-            title=title,
-            location=location,
-        ),
+        "result": items
     }
 
 
@@ -77,5 +82,8 @@ async def part_update_hotel(db: DBDep, hotel_id: int, hotel_data: HotelPatch):
 
 @router.get("/{hotel_id}")
 async def get_one_item(db: DBDep, hotel_id: int):
-    result = await db.hotels.get_one_or_none(id=hotel_id)
+    try:
+        result = await db.hotels.get_one(id=hotel_id)
+    except RecordNotFoundException as ex:
+        raise HTTPException(status_code=404, detail=ex.detail)
     return {"status": "OK", "hotel": result}

@@ -13,6 +13,7 @@ from src.database import Base, engine_null_pull, async_session_maker_null_pull
 import pytest
 from src.config import settings
 from src.main import app
+from typing import AsyncGenerator
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -20,13 +21,13 @@ def check_test_mode():
     assert settings.MODE == "TEST"
 
 
-async def get_db_null_pull() -> DBManager:
+async def get_db_null_pull() -> AsyncGenerator[DBManager]:
     async with DBManager(session_factory=async_session_maker_null_pull) as db:
         yield db
 
 
 @pytest.fixture(scope="function")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager]:
     async for db in get_db_null_pull():
         yield db
 
@@ -53,7 +54,7 @@ async def setup_database(check_test_mode):
 
 
 @pytest.fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient]:
     async with AsyncClient(
         base_url="http://test", transport=ASGITransport(app=app)
     ) as ac:

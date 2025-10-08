@@ -4,6 +4,7 @@ from src.schemas.rooms import Room, RoomWithRels
 from sqlalchemy import select
 from datetime import date
 from src.repositories.utils import rooms_ids_for_booking
+from src.exceptions import DateFromMoreToException
 
 from sqlalchemy.orm import selectinload
 from src.repositories.mappers.mappers import RoomDataMapper, RoomRelDataMapper
@@ -24,6 +25,8 @@ class RoomRepository(BaseRepository):
     async def get_filtered_by_time(
         self, hotel_id, date_from: date, date_to: date
     ) -> list[RoomWithRels]:
+        if date_from > date_to:
+            raise DateFromMoreToException
         return await self.get_filtered(
             self.model.id.in_(
                 rooms_ids_for_booking(
@@ -55,3 +58,4 @@ class RoomRepository(BaseRepository):
         if result:
             return RoomRelDataMapper.map_to_domain_entity(result.scalar_one_or_none())
         return None
+    

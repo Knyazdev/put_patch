@@ -2,6 +2,9 @@ from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
 from typing import Any
 from src.repositories.mappers.base import DataMapper
+from typing import Sequence
+from src.exceptions import RecordNotFoundException
+from sqlalchemy.exc import NoResultFound
 
 
 class BaseRepository:
@@ -24,13 +27,23 @@ class BaseRepository:
         if result:
             return self.mapper.map_to_domain_entity(result.scalar_one_or_none())
         return None
+    
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise RecordNotFoundException
+            
+        return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel):
         stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result = await self.session.execute(stmt)
         return self.mapper.map_to_domain_entity(result.scalars().one())
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: Sequence[BaseModel]):
         stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(stmt)
 
