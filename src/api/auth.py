@@ -2,7 +2,12 @@ from fastapi import APIRouter, HTTPException, Response
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthService
 from src.api.dependencies import userIdDep, DBDep
-from src.exceptions import UserAlreadyExistException
+from src.exceptions import (
+    UserAlreadyExistException,
+    HttpUserAlreadyExistException,
+    UserNotExistException,
+    WrongUserPasswordException
+)
 
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
@@ -10,34 +15,37 @@ router = APIRouter(prefix="/auth", tags=["Authentification"])
 
 @router.post("/register")
 async def register(db: DBDep, data: UserRequestAdd):
-    hashed_password = AuthService().pwd_context.hash(data.password)
-    data_user = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
-        await db.users.add(data_user)
+        await AuthService(db).register(data)
     except UserAlreadyExistException as ex:
-        raise HTTPException(status_code=422, detail=ex.detail)
-    await db.commit()
-    return {"status": "OK"}
+        raise HttpUserAlreadyExistException from ex
+    return {
+        "status": "OK"
+    }
 
 
 @router.post("/login")
 async def login(db: DBDep, data: UserRequestAdd, response: Response):
-    user = await db.users.get_user_with_hashed_password(email=data.email)
-    if not user:
-        raise HTTPException(status_code=401, detail="This email already exists")
-    if not AuthService().verify_password(data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Wrong password")
-    access_token = AuthService().create_access_token({"user_id": user.id})
-    response.set_cookie("access_token", access_token)
-    return {"access_token": access_token}
+    try:
+        access_token = await AuthService(db).login(data)
+        response.set_cookie("access_token", access_token)
+        return {
+            "access_token": access_token
+        }
+    except UserNotExistException as ex:
+        raise HTTPException(status_code=401, detail=ex.detail)
+    except WrongUserPasswordException as ex:
+        raise HTTPException(status_code=401, detail=ex.detail)
 
 
 @router.get("/me")
 async def get_me(user_id: userIdDep, db: DBDep):
-    return await db.users.get_one_or_none(id=user_id)
+    return await AuthService(db).get_me(user_id)
 
 
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie("access_token")
-    return {"status": "OK"}
+    return {
+        "status": "OK"
+    }

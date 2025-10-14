@@ -80,6 +80,7 @@ nbclient==0.10.2
 nbconvert==7.16.6
 nbformat==5.10.4
 nest-asyncio==1.6.0
+nodeenv==1.9.1
 notebook_shim==0.2.4
 openpyxl==3.1.5
 overrides==7.7.0
@@ -96,6 +97,7 @@ pluggy==1.6.0
 prometheus_client==0.21.1
 prompt_toolkit==3.0.51
 psutil==7.0.0
+psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pycparser==2.22
@@ -104,6 +106,7 @@ pydantic-settings==2.9.1
 pydantic_core==2.33.2
 Pygments==2.19.1
 PyJWT==2.10.1
+pyright==1.1.406
 pytest==8.4.2
 pytest-asyncio==1.2.0
 pytest-dotenv==0.5.2

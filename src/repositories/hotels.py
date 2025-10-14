@@ -7,6 +7,7 @@ from datetime import date
 from src.repositories.utils import rooms_ids_for_booking
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.exceptions import DateFromMoreToException
+import logging
 
 
 class HotelRepository(BaseRepository):
@@ -39,6 +40,7 @@ class HotelRepository(BaseRepository):
         offset: int = 5,
     ) -> list[Hotel]:
         if date_from > date_to:
+            logging.info(f"ERR DATE {date_from} > {date_to}")
             raise DateFromMoreToException
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
         hotel_ids_to_get = (

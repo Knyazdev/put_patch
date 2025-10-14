@@ -9,6 +9,19 @@ class FacilityRepository(BaseRepository):
     model = FacilityOrm
     mapper = FacilityDataMapper
 
+    async def check_aviable(self, data: list[int]) -> bool:
+        if data:
+            query = (
+                select(self.model.id)
+                .select_from(self.model)
+            )
+            result = await self.session.execute(query)
+            items = result.scalars().all()
+            for l in data:
+                if l not in items:
+                    return False
+        return True
+
 
 class RoomFacilityRepository(BaseRepository):
     model = RoomFacilitiesOrm

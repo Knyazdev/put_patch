@@ -1,4 +1,5 @@
 import uvicorn
+import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.init import redis_manager
@@ -20,7 +21,7 @@ from src.api.images import router as router_images
 
 # isort: on
 sys.path.append(str(Path(__file__).parent.parent))
-
+logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
