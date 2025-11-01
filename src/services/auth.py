@@ -49,9 +49,9 @@ class AuthService(BaseService):
         data_user = UserAdd(email=request.email, hashed_password=hashed_password)
         try:
             user = await self.db.users.add(data_user)
+            await self.db.commit()
         except RecordAlreadyExistException as ex:
             raise UserAlreadyExistException from ex
-        self.db.commit()
         return user
     
     async def login(self, request: UserRequestAdd):

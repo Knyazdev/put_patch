@@ -8,7 +8,6 @@ argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 arrow==1.3.0
 aspose-cells==24.10.0
-aspose-cells-python==25.8.0
 asttokens==3.0.0
 async-lru==2.0.5
 asyncpg==0.30.0

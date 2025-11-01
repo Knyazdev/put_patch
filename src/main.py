@@ -2,14 +2,16 @@ import uvicorn
 import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
 from src.init import redis_manager
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 
-import sys
-from pathlib import Path
+
 
 # isort: off
 from src.api.hotels import router as router_hotels
@@ -20,7 +22,7 @@ from src.api.facilities import router as router_facility
 from src.api.images import router as router_images
 
 # isort: on
-sys.path.append(str(Path(__file__).parent.parent))
+
 logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
@@ -43,4 +45,4 @@ app.include_router(router_images)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", host='0.0.0.0', reload=True)

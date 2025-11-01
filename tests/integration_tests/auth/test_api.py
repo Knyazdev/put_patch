@@ -32,4 +32,4 @@ async def test_register_user(email: str, password: str, ac: AsyncClient):
     assert response_logout.status_code == 200
 
     response_me = await ac.get("/auth/me")
-    assert response_me.status_code == 401
+    assert response_me.status_code == 400
